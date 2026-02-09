@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DashboardCategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\PostController;
@@ -54,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard / Analytics
     Route::prefix('dashboard')->group(function () {
-        Route::get('/categories', [DashboardController::class, 'categories']);
+        Route::apiResource('categories', DashboardCategoryController::class);
         Route::get('/users', [DashboardController::class, 'users']);
         Route::get('/posts', [DashboardController::class, 'posts']);
         Route::get('/messages', [DashboardController::class, 'messages']);

@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
 use App\Http\Resources\MessageResource;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\UserResource;
-use App\Models\Category;
 use App\Models\Message;
 use App\Models\Post;
 use App\Models\User;
@@ -15,18 +13,6 @@ use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
-    /**
-     * List all categories.
-     */
-    public function categories(): JsonResponse
-    {
-        $categories = Category::withCount(['posts', 'users'])->get();
-
-        return response()->json([
-            'categories' => CategoryResource::collection($categories),
-        ]);
-    }
-
     /**
      * List all users with points, last login, referral link.
      */

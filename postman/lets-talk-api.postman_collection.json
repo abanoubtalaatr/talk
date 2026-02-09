@@ -1,0 +1,654 @@
+{
+	"info": {
+		"_postman_id": "lets-talk-api-collection",
+		"name": "Lets Talk API",
+		"description": "API collection for Lets Talk - Auth, Profile, Categories, Posts, Messages, Activity, Dashboard",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "post_id",
+			"value": "1"
+		},
+		{
+			"key": "user_id",
+			"value": "1"
+		},
+		{
+			"key": "category_id",
+			"value": "1"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Auth (Public)",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"secret123\",\n  \"password_confirmation\": \"secret123\",\n  \"referral_username\": null,\n  \"mac_address\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": ["{{base_url}}"],
+							"path": ["register"]
+						},
+						"description": "Register a new user. Optional: referral_username, mac_address. Default categories (Love, Friendship, Dreams) are assigned."
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const json = pm.response.json();",
+									"    if (json.token) {",
+									"        pm.collectionVariables.set('token', json.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"secret123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "Login. Saves token to collection variable for subsequent requests."
+					}
+				}
+			]
+		},
+		{
+			"name": "Auth (Authenticated)",
+			"item": [
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": ["{{base_url}}"],
+							"path": ["logout"]
+						},
+						"description": "Revoke current access token."
+					}
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": ["{{base_url}}"],
+							"path": ["profile"]
+						},
+						"description": "Get authenticated user's profile with categories, referrer, blocked users, counts."
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "bio",
+									"value": "Hello, I love connecting with people!",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": ["{{base_url}}"],
+							"path": ["profile"]
+						},
+						"description": "Update profile. Optional: bio (max 500), image (jpeg,png,jpg,gif, max 2MB). Use form-data for image."
+					}
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": ["{{base_url}}"],
+							"path": ["categories"]
+						},
+						"description": "List all categories."
+					}
+				},
+				{
+					"name": "Update User Categories",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"category_ids\": [1, 2, 3]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/categories",
+							"host": ["{{base_url}}"],
+							"path": ["users", "categories"]
+						},
+						"description": "Update authenticated user's preferred categories. Minimum 3 category IDs required."
+					}
+				}
+			]
+		},
+		{
+			"name": "Posts",
+			"item": [
+				{
+					"name": "Create Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"What makes you happy today?\",\n  \"is_anonymous\": false,\n  \"category_ids\": [1, 2]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts",
+							"host": ["{{base_url}}"],
+							"path": ["posts"]
+						},
+						"description": "Create a post. content (max 300), is_anonymous (optional boolean), category_ids (array, min 1)."
+					}
+				},
+				{
+					"name": "List Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts?page=1",
+							"host": ["{{base_url}}"],
+							"path": ["posts"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "List posts for user's categories. Paginated (15 per page)."
+					}
+				},
+				{
+					"name": "Best Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/best?page=1",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "best"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Best posts by total reactions (stars + likes). Paginated."
+					}
+				},
+				{
+					"name": "Get Post",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/posts/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{post_id}}"]
+						},
+						"description": "Get single post with comments (nested). Set post_id in collection variables."
+					}
+				},
+				{
+					"name": "Comment on Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Great post!\",\n  \"parent_id\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{post_id}}/comment",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{post_id}}", "comment"]
+						},
+						"description": "Add comment or reply. parent_id optional (for replies). content max 1000 chars."
+					}
+				},
+				{
+					"name": "React to Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"like\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{post_id}}/reaction",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{post_id}}", "reaction"]
+						},
+						"description": "Add or toggle reaction. type: 'like' or 'star'. Toggles if already present."
+					}
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receiver_id\": 2,\n  \"content\": \"Hi! Would love to connect.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/messages",
+							"host": ["{{base_url}}"],
+							"path": ["messages"]
+						},
+						"description": "Send message. Limit: 3 messages/day total, 24h between messages to same user. content max 2000."
+					}
+				},
+				{
+					"name": "Last Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/messages/last",
+							"host": ["{{base_url}}"],
+							"path": ["messages", "last"]
+						},
+						"description": "Get last 3 messages sent by authenticated user."
+					}
+				}
+			]
+		},
+		{
+			"name": "Activity",
+			"item": [
+				{
+					"name": "User Activity Log",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}/activity",
+							"host": ["{{base_url}}"],
+							"path": ["users", "{{user_id}}", "activity"]
+						},
+						"description": "Get activity log for a user. Set user_id in collection variables."
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Dashboard - Categories (CRUD)",
+					"item": [
+						{
+							"name": "List Categories",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/dashboard/categories",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "categories"]
+								},
+								"description": "List all categories with posts_count and users_count."
+							}
+						},
+						{
+							"name": "Create Category",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"New Category\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/dashboard/categories",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "categories"]
+								},
+								"description": "Create a category. name is required and must be unique."
+							}
+						},
+						{
+							"name": "Get Category",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/dashboard/categories/{{category_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "categories", "{{category_id}}"]
+								},
+								"description": "Get a single category by id. Set category_id in collection variables."
+							}
+						},
+						{
+							"name": "Update Category",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Category Name\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/dashboard/categories/{{category_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "categories", "{{category_id}}"]
+								},
+								"description": "Update a category. name is required and must be unique (excluding current category)."
+							}
+						},
+						{
+							"name": "Delete Category",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/dashboard/categories/{{category_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "categories", "{{category_id}}"]
+								},
+								"description": "Delete a category. Set category_id in collection variables."
+							}
+						}
+					]
+				},
+				{
+					"name": "Dashboard - Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/users",
+							"host": ["{{base_url}}"],
+							"path": ["dashboard", "users"]
+						}
+					}
+				},
+				{
+					"name": "Dashboard - Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/posts",
+							"host": ["{{base_url}}"],
+							"path": ["dashboard", "posts"]
+						}
+					}
+				},
+				{
+					"name": "Dashboard - Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/messages",
+							"host": ["{{base_url}}"],
+							"path": ["dashboard", "messages"]
+						}
+					}
+				},
+				{
+					"name": "Dashboard - Best Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/best-posts",
+							"host": ["{{base_url}}"],
+							"path": ["dashboard", "best-posts"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
