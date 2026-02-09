@@ -24,21 +24,17 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'username' => fake()->unique()->userName(),
             'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'bio' => fake()->optional()->sentence(),
+            'image' => null,
+            'points' => fake()->numberBetween(0, 100),
+            'ip_address' => fake()->ipv4(),
+            'user_agent' => fake()->userAgent(),
+            'mac_address' => null,
+            'last_login_at' => fake()->optional()->dateTimeBetween('-30 days', 'now'),
+            'last_login_ip' => fake()->optional()->ipv4(),
+            'last_login_user_agent' => fake()->optional()->userAgent(),
         ];
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
     }
 }
