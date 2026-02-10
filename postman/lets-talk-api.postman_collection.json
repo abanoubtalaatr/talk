@@ -2,40 +2,22 @@
 	"info": {
 		"_postman_id": "lets-talk-api-collection",
 		"name": "Lets Talk API",
-		"description": "API collection for Lets Talk - Auth, Profile, Categories, Posts, Messages, Activity, Dashboard",
+		"description": "Lets Talk API – Auth, Profile, Categories, Posts, Messages/Chat (with Pusher), Activity, Dashboard. Base URL: {{base_url}}. Run Login to set {{token}}.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000/api"
-		},
-		{
-			"key": "token",
-			"value": ""
-		},
-		{
-			"key": "post_id",
-			"value": "1"
-		},
-		{
-			"key": "user_id",
-			"value": "1"
-		},
-		{
-			"key": "category_id",
-			"value": "1"
-		}
+		{ "key": "base_url", "value": "http://localhost:8000/api" },
+		{ "key": "token", "value": "" },
+		{ "key": "post_id", "value": "1" },
+		{ "key": "user_id", "value": "1" },
+		{ "key": "category_id", "value": "1" },
+		{ "key": "plan_id", "value": "1" },
+		{ "key": "comment_id", "value": "1" },
+		{ "key": "payment_id", "value": "1" }
 	],
 	"auth": {
 		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{token}}",
-				"type": "string"
-			}
-		]
+		"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
 	},
 	"item": [
 		{
@@ -44,101 +26,62 @@
 				{
 					"name": "Register",
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
+						"auth": { "type": "noauth" },
 						"method": "POST",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"secret123\",\n  \"password_confirmation\": \"secret123\",\n  \"referral_username\": null,\n  \"mac_address\": null\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/register",
-							"host": ["{{base_url}}"],
-							"path": ["register"]
-						},
-						"description": "Register a new user. Optional: referral_username, mac_address. Default categories (Love, Friendship, Dreams) are assigned."
+						"url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
+						"description": "Register a new user. Required: username (3–30, alpha_dash, unique), password (min 6, confirmed). Optional: referral_username, mac_address."
 					}
 				},
 				{
 					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const json = pm.response.json();",
-									"    if (json.token) {",
-									"        pm.collectionVariables.set('token', json.token);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"if (pm.response.code === 200) {",
+								"  const json = pm.response.json();",
+								"  if (json.token) pm.collectionVariables.set('token', json.token);",
+								"}"
+							],
+							"type": "text/javascript"
 						}
-					],
+					}],
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
+						"auth": { "type": "noauth" },
 						"method": "POST",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"secret123\"\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/login",
-							"host": ["{{base_url}}"],
-							"path": ["login"]
-						},
-						"description": "Login. Saves token to collection variable for subsequent requests."
+						"url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
+						"description": "Login. On success, token is saved to collection variable for Bearer auth."
 					}
 				}
 			]
 		},
 		{
 			"name": "Auth (Authenticated)",
-			"item": [
-				{
-					"name": "Logout",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/logout",
-							"host": ["{{base_url}}"],
-							"path": ["logout"]
-						},
-						"description": "Revoke current access token."
-					}
+			"item": [{
+				"name": "Logout",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Accept", "value": "application/json" }],
+					"url": { "raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"] },
+					"description": "Revoke current access token."
 				}
-			]
+			}]
 		},
 		{
 			"name": "Profile",
@@ -147,50 +90,24 @@
 					"name": "Get Profile",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/profile",
-							"host": ["{{base_url}}"],
-							"path": ["profile"]
-						},
-						"description": "Get authenticated user's profile with categories, referrer, blocked users, counts."
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] },
+						"description": "Get authenticated user profile (categories, referrer, blocked users, counts)."
 					}
 				},
 				{
 					"name": "Update Profile",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
+						"header": [{ "key": "Accept", "value": "application/json" }],
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{
-									"key": "bio",
-									"value": "Hello, I love connecting with people!",
-									"type": "text"
-								},
-								{
-									"key": "image",
-									"type": "file",
-									"src": ""
-								}
+								{ "key": "bio", "value": "Hello, I love connecting with people!", "type": "text" },
+								{ "key": "image", "type": "file", "src": "" }
 							]
 						},
-						"url": {
-							"raw": "{{base_url}}/profile",
-							"host": ["{{base_url}}"],
-							"path": ["profile"]
-						},
+						"url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] },
 						"description": "Update profile. Optional: bio (max 500), image (jpeg,png,jpg,gif, max 2MB). Use form-data for image."
 					}
 				}
@@ -203,17 +120,8 @@
 					"name": "List Categories",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/categories",
-							"host": ["{{base_url}}"],
-							"path": ["categories"]
-						},
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] },
 						"description": "List all categories."
 					}
 				},
@@ -222,24 +130,11 @@
 					"request": {
 						"method": "PUT",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"category_ids\": [1, 2, 3]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/users/categories",
-							"host": ["{{base_url}}"],
-							"path": ["users", "categories"]
-						},
+						"body": { "mode": "raw", "raw": "{\n  \"category_ids\": [1, 2, 3]\n}" },
+						"url": { "raw": "{{base_url}}/users/categories", "host": ["{{base_url}}"], "path": ["users", "categories"] },
 						"description": "Update authenticated user's preferred categories. Minimum 3 category IDs required."
 					}
 				}
@@ -253,91 +148,55 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"content\": \"What makes you happy today?\",\n  \"is_anonymous\": false,\n  \"category_ids\": [1, 2]\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/posts",
-							"host": ["{{base_url}}"],
-							"path": ["posts"]
-						},
-						"description": "Create a post. content (max 300), is_anonymous (optional boolean), category_ids (array, min 1)."
+						"url": { "raw": "{{base_url}}/posts", "host": ["{{base_url}}"], "path": ["posts"] },
+						"description": "Create a post. content (max 300), is_anonymous (optional), category_ids (array, min 1)."
 					}
 				},
 				{
 					"name": "List Posts",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
+						"header": [{ "key": "Accept", "value": "application/json" }],
 						"url": {
-							"raw": "{{base_url}}/posts?page=1",
+							"raw": "{{base_url}}/posts?page=1&sort=newest",
 							"host": ["{{base_url}}"],
 							"path": ["posts"],
 							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								}
+								{ "key": "page", "value": "1" },
+								{ "key": "sort", "value": "newest", "description": "newest | popular" }
 							]
 						},
-						"description": "List posts for user's categories. Paginated (15 per page)."
+						"description": "List posts for user's categories. sort: newest (default) or popular (by reactions). Paginated (15 per page)."
 					}
 				},
 				{
 					"name": "Best Posts",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
+						"header": [{ "key": "Accept", "value": "application/json" }],
 						"url": {
 							"raw": "{{base_url}}/posts/best?page=1",
 							"host": ["{{base_url}}"],
 							"path": ["posts", "best"],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								}
-							]
+							"query": [{ "key": "page", "value": "1" }]
 						},
-						"description": "Best posts by total reactions (stars + likes). Paginated."
+						"description": "Best posts by reactions (stars + likes). Paginated."
 					}
 				},
 				{
 					"name": "Get Post",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/posts/{{post_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["posts", "{{post_id}}"]
-						},
-						"description": "Get single post with comments (nested). Set post_id in collection variables."
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{base_url}}/posts/{{post_id}}", "host": ["{{base_url}}"], "path": ["posts", "{{post_id}}"] },
+						"description": "Get single post with nested comments. Set post_id in collection variables."
 					}
 				},
 				{
@@ -345,25 +204,12 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"content\": \"Great post!\",\n  \"parent_id\": null\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/posts/{{post_id}}/comment",
-							"host": ["{{base_url}}"],
-							"path": ["posts", "{{post_id}}", "comment"]
-						},
-						"description": "Add comment or reply. parent_id optional (for replies). content max 1000 chars."
+						"body": { "mode": "raw", "raw": "{\n  \"content\": \"Great post!\",\n  \"parent_id\": null\n}" },
+						"url": { "raw": "{{base_url}}/posts/{{post_id}}/comment", "host": ["{{base_url}}"], "path": ["posts", "{{post_id}}", "comment"] },
+						"description": "Add comment or reply. parent_id optional for replies. content max 1000."
 					}
 				},
 				{
@@ -371,100 +217,86 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"type\": \"like\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/posts/{{post_id}}/reaction",
-							"host": ["{{base_url}}"],
-							"path": ["posts", "{{post_id}}", "reaction"]
-						},
-						"description": "Add or toggle reaction. type: 'like' or 'star'. Toggles if already present."
+						"body": { "mode": "raw", "raw": "{\n  \"type\": \"like\"\n}" },
+						"url": { "raw": "{{base_url}}/posts/{{post_id}}/reaction", "host": ["{{base_url}}"], "path": ["posts", "{{post_id}}", "reaction"] },
+						"description": "Add or toggle reaction. type: like | star. Toggles if already present."
 					}
 				}
 			]
 		},
 		{
-			"name": "Messages",
+			"name": "Messages / Chat",
 			"item": [
+				{
+					"name": "Get Message Quota",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{base_url}}/messages/quota", "host": ["{{base_url}}"], "path": ["messages", "quota"] },
+						"description": "Quota for new conversations only: 3 per day. Returns new_conversations_started_today, limit, remaining. Replies in existing chats are unlimited."
+					}
+				},
+				{
+					"name": "List My Conversations",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{base_url}}/messages/conversations", "host": ["{{base_url}}"], "path": ["messages", "conversations"] },
+						"description": "List chats: conversation partners and last message. Real-time via Pusher (private-user.{id}, private-category.{id})."
+					}
+				},
+				{
+					"name": "Get Conversation with User",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/messages/conversation/{{user_id}}?page=1",
+							"host": ["{{base_url}}"],
+							"path": ["messages", "conversation", "{{user_id}}"],
+							"query": [{ "key": "page", "value": "1" }]
+						},
+						"description": "Paginated messages between you and the user. Set user_id in collection variables."
+					}
+				},
 				{
 					"name": "Send Message",
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"receiver_id\": 2,\n  \"content\": \"Hi! Would love to connect.\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/messages",
-							"host": ["{{base_url}}"],
-							"path": ["messages"]
-						},
-						"description": "Send message. Limit: 3 messages/day total, 24h between messages to same user. content max 2000."
+						"body": { "mode": "raw", "raw": "{\n  \"receiver_id\": 2,\n  \"content\": \"Hi! Would love to connect.\"\n}" },
+						"url": { "raw": "{{base_url}}/messages", "host": ["{{base_url}}"], "path": ["messages"] },
+						"description": "Send message or reply. New conversation = 3/day limit, broadcast to receiver + same-category users. Reply in existing chat = unlimited. content max 2000."
 					}
 				},
 				{
 					"name": "Last Messages",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/messages/last",
-							"host": ["{{base_url}}"],
-							"path": ["messages", "last"]
-						},
-						"description": "Get last 3 messages sent by authenticated user."
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{base_url}}/messages/last", "host": ["{{base_url}}"], "path": ["messages", "last"] },
+						"description": "Last 3 messages sent by authenticated user."
 					}
 				}
 			]
 		},
 		{
 			"name": "Activity",
-			"item": [
-				{
-					"name": "User Activity Log",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}/activity",
-							"host": ["{{base_url}}"],
-							"path": ["users", "{{user_id}}", "activity"]
-						},
-						"description": "Get activity log for a user. Set user_id in collection variables."
-					}
+			"item": [{
+				"name": "User Activity Log",
+				"request": {
+					"method": "GET",
+					"header": [{ "key": "Accept", "value": "application/json" }],
+					"url": { "raw": "{{base_url}}/users/{{user_id}}/activity", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}", "activity"] },
+					"description": "Activity log for a user. Set user_id in collection variables."
 				}
-			]
+			}]
 		},
 		{
 			"name": "Dashboard",
@@ -476,17 +308,8 @@
 							"name": "List Categories",
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/dashboard/categories",
-									"host": ["{{base_url}}"],
-									"path": ["dashboard", "categories"]
-								},
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/categories", "host": ["{{base_url}}"], "path": ["dashboard", "categories"] },
 								"description": "List all categories with posts_count and users_count."
 							}
 						},
@@ -495,43 +318,21 @@
 							"request": {
 								"method": "POST",
 								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Content-Type", "value": "application/json" }
 								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"New Category\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/dashboard/categories",
-									"host": ["{{base_url}}"],
-									"path": ["dashboard", "categories"]
-								},
-								"description": "Create a category. name is required and must be unique."
+								"body": { "mode": "raw", "raw": "{\n  \"name\": \"New Category\"\n}" },
+								"url": { "raw": "{{base_url}}/dashboard/categories", "host": ["{{base_url}}"], "path": ["dashboard", "categories"] },
+								"description": "Create a category. name required, unique."
 							}
 						},
 						{
 							"name": "Get Category",
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/dashboard/categories/{{category_id}}",
-									"host": ["{{base_url}}"],
-									"path": ["dashboard", "categories", "{{category_id}}"]
-								},
-								"description": "Get a single category by id. Set category_id in collection variables."
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "categories", "{{category_id}}"] },
+								"description": "Get one category by id. Set category_id in collection variables."
 							}
 						},
 						{
@@ -539,113 +340,323 @@
 							"request": {
 								"method": "PUT",
 								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Content-Type", "value": "application/json" }
 								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"Updated Category Name\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/dashboard/categories/{{category_id}}",
-									"host": ["{{base_url}}"],
-									"path": ["dashboard", "categories", "{{category_id}}"]
-								},
-								"description": "Update a category. name is required and must be unique (excluding current category)."
+								"body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Category Name\"\n}" },
+								"url": { "raw": "{{base_url}}/dashboard/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "categories", "{{category_id}}"] },
+								"description": "Update category. name required, unique (excluding current)."
 							}
 						},
 						{
 							"name": "Delete Category",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/dashboard/categories/{{category_id}}",
-									"host": ["{{base_url}}"],
-									"path": ["dashboard", "categories", "{{category_id}}"]
-								},
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "categories", "{{category_id}}"] },
 								"description": "Delete a category. Set category_id in collection variables."
 							}
 						}
 					]
 				},
 				{
-					"name": "Dashboard - Users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
+					"name": "Dashboard - Plans (CRUD)",
+					"item": [
+						{
+							"name": "List Plans",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/plans", "host": ["{{base_url}}"], "path": ["dashboard", "plans"] }
 							}
-						],
-						"url": {
-							"raw": "{{base_url}}/dashboard/users",
-							"host": ["{{base_url}}"],
-							"path": ["dashboard", "users"]
+						},
+						{
+							"name": "Create Plan",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Free\",\n  \"is_free\": true,\n  \"new_chats_per_day\": 3,\n  \"messages_per_day\": 3,\n  \"send_new_msg_per_day\": 3,\n  \"posts_per_day\": -1,\n  \"post_chars\": 300,\n  \"message_chars\": 200,\n  \"topic_change_days\": 7,\n  \"topics_count\": 3,\n  \"open_chats\": 0\n}"
+								},
+								"url": { "raw": "{{base_url}}/dashboard/plans", "host": ["{{base_url}}"], "path": ["dashboard", "plans"] }
+							}
+						},
+						{
+							"name": "Get Plan",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "plans", "{{plan_id}}"] }
+							}
+						},
+						{
+							"name": "Update Plan",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Premium\",\n  \"post_chars\": 500\n}"
+								},
+								"url": { "raw": "{{base_url}}/dashboard/plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "plans", "{{plan_id}}"] }
+							}
+						},
+						{
+							"name": "Delete Plan",
+							"request": {
+								"method": "DELETE",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "plans", "{{plan_id}}"] }
+							}
 						}
-					}
+					]
 				},
 				{
-					"name": "Dashboard - Posts",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
+					"name": "Dashboard - Users",
+					"item": [
+						{
+							"name": "List Users",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": {
+									"raw": "{{base_url}}/dashboard/users?page=1&search=",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "users"],
+									"query": [
+										{ "key": "page", "value": "1" },
+										{ "key": "search", "value": "" }
+									]
+								}
+							},
+							"description": "Search by username, display_name or id. Returns plan, reputation, invited_by, status."
+						},
+						{
+							"name": "Ban User",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/users/{{user_id}}/ban", "host": ["{{base_url}}"], "path": ["dashboard", "users", "{{user_id}}", "ban"] }
 							}
-						],
-						"url": {
-							"raw": "{{base_url}}/dashboard/posts",
-							"host": ["{{base_url}}"],
-							"path": ["dashboard", "posts"]
+						},
+						{
+							"name": "Unban User",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/users/{{user_id}}/unban", "host": ["{{base_url}}"], "path": ["dashboard", "users", "{{user_id}}", "unban"] }
+							}
 						}
-					}
+					]
 				},
 				{
 					"name": "Dashboard - Messages",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
+					"item": [
+						{
+							"name": "List Messages",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/messages?page=1", "host": ["{{base_url}}"], "path": ["dashboard", "messages"], "query": [{ "key": "page", "value": "1" }] }
 							}
-						],
-						"url": {
-							"raw": "{{base_url}}/dashboard/messages",
-							"host": ["{{base_url}}"],
-							"path": ["dashboard", "messages"]
+						},
+						{
+							"name": "Delete Thread",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"user_id\": 1,\n  \"other_user_id\": 2\n}"
+								},
+								"url": { "raw": "{{base_url}}/dashboard/messages/delete-thread", "host": ["{{base_url}}"], "path": ["dashboard", "messages", "delete-thread"] }
+							},
+							"description": "Delete whole chat between two users. Body: user_id, other_user_id."
 						}
-					}
+					]
+				},
+				{
+					"name": "Dashboard - Posts",
+					"item": [
+						{
+							"name": "List Posts",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": {
+									"raw": "{{base_url}}/dashboard/posts?page=1",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "posts"],
+									"query": [
+										{ "key": "page", "value": "1" },
+										{ "key": "content", "value": "" },
+										{ "key": "created_by", "value": "" },
+										{ "key": "id", "value": "" },
+										{ "key": "reported", "value": "true" }
+									]
+								}
+							}
+						},
+						{
+							"name": "Post - Set Featured",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/posts/{{post_id}}/featured", "host": ["{{base_url}}"], "path": ["dashboard", "posts", "{{post_id}}", "featured"] }
+							}
+						},
+						{
+							"name": "Post - Unfeatured",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/posts/{{post_id}}/unfeatured", "host": ["{{base_url}}"], "path": ["dashboard", "posts", "{{post_id}}", "unfeatured"] }
+							}
+						},
+						{
+							"name": "Post - Hide",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/posts/{{post_id}}/hide", "host": ["{{base_url}}"], "path": ["dashboard", "posts", "{{post_id}}", "hide"] }
+							}
+						},
+						{
+							"name": "Post - Unhide",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/posts/{{post_id}}/unhide", "host": ["{{base_url}}"], "path": ["dashboard", "posts", "{{post_id}}", "unhide"] }
+							}
+						},
+						{
+							"name": "Post - Dismiss Report",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/posts/{{post_id}}/dismiss-report", "host": ["{{base_url}}"], "path": ["dashboard", "posts", "{{post_id}}", "dismiss-report"] }
+							}
+						},
+						{
+							"name": "Delete Post",
+							"request": {
+								"method": "DELETE",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/posts/{{post_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "posts", "{{post_id}}"] }
+							}
+						}
+					]
+				},
+				{
+					"name": "Dashboard - Comments",
+					"item": [
+						{
+							"name": "List Comments",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": {
+									"raw": "{{base_url}}/dashboard/comments?page=1",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "comments"],
+									"query": [
+										{ "key": "page", "value": "1" },
+										{ "key": "username", "value": "" },
+										{ "key": "content", "value": "" },
+										{ "key": "post_id", "value": "" },
+										{ "key": "reported", "value": "true" }
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Comment",
+							"request": {
+								"method": "DELETE",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/comments/{{comment_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "comments", "{{comment_id}}"] }
+							}
+						},
+						{
+							"name": "Comment - Dismiss Report",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/comments/{{comment_id}}/dismiss-report", "host": ["{{base_url}}"], "path": ["dashboard", "comments", "{{comment_id}}", "dismiss-report"] }
+							}
+						}
+					]
+				},
+				{
+					"name": "Dashboard - Payments",
+					"item": [
+						{
+							"name": "List Payments",
+							"request": {
+								"method": "GET",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": {
+									"raw": "{{base_url}}/dashboard/payments?page=1",
+									"host": ["{{base_url}}"],
+									"path": ["dashboard", "payments"],
+									"query": [
+										{ "key": "page", "value": "1" },
+										{ "key": "name", "value": "" },
+										{ "key": "user_id", "value": "" },
+										{ "key": "status", "value": "under_review" },
+										{ "key": "under_review", "value": "true" }
+									]
+								}
+							}
+						},
+						{
+							"name": "Approve Payment",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/payments/{{payment_id}}/approve", "host": ["{{base_url}}"], "path": ["dashboard", "payments", "{{payment_id}}", "approve"] }
+							}
+						},
+						{
+							"name": "Disapprove Payment",
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/payments/{{payment_id}}/disapprove", "host": ["{{base_url}}"], "path": ["dashboard", "payments", "{{payment_id}}", "disapprove"] }
+							}
+						},
+						{
+							"name": "Delete Payment",
+							"request": {
+								"method": "DELETE",
+								"header": [{ "key": "Accept", "value": "application/json" }],
+								"url": { "raw": "{{base_url}}/dashboard/payments/{{payment_id}}", "host": ["{{base_url}}"], "path": ["dashboard", "payments", "{{payment_id}}"] }
+							}
+						}
+					]
 				},
 				{
 					"name": "Dashboard - Best Posts",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
+						"header": [{ "key": "Accept", "value": "application/json" }],
 						"url": {
-							"raw": "{{base_url}}/dashboard/best-posts",
+							"raw": "{{base_url}}/dashboard/best-posts?page=1",
 							"host": ["{{base_url}}"],
-							"path": ["dashboard", "best-posts"]
-						}
+							"path": ["dashboard", "best-posts"],
+							"query": [{ "key": "page", "value": "1" }]
+						},
+						"description": "Best posts by reactions. Paginated (20 per page)."
 					}
 				}
 			]

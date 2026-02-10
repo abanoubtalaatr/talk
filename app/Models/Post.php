@@ -16,12 +16,18 @@ class Post extends Model
         'user_id',
         'content',
         'is_anonymous',
+        'is_featured',
+        'is_hidden',
+        'reported_at',
     ];
 
     protected function casts(): array
     {
         return [
             'is_anonymous' => 'boolean',
+            'is_featured' => 'boolean',
+            'is_hidden' => 'boolean',
+            'reported_at' => 'datetime',
         ];
     }
 

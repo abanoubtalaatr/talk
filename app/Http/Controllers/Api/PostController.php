@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PostCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\StorePostRequest;
@@ -11,6 +12,7 @@ use App\Http\Resources\PostResource;
 use App\Http\Resources\ReactionResource;
 use App\Models\Post;
 use App\Models\Reaction;
+use App\Models\User;
 use App\Services\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,6 +45,16 @@ class PostController extends Controller
         $post->load(['user', 'categories'])
             ->loadCount(['likes', 'stars', 'reactions', 'comments']);
 
+        // Broadcast once per user who shares at least one category (no duplicate delivery)
+        $categoryIds = $post->categories->pluck('id');
+        $userIdsToNotify = User::whereHas('categories', fn ($q) => $q->whereIn('categories.id', $categoryIds))
+            ->where('id', '!=', $post->user_id)
+            ->pluck('id');
+
+        foreach ($userIdsToNotify as $targetUserId) {
+            broadcast(new PostCreated($post, $targetUserId))->toOthers();
+        }
+
         return response()->json([
             'message' => 'Post created successfully.',
             'post' => new PostResource($post),
@@ -51,16 +63,24 @@ class PostController extends Controller
 
     /**
      * List posts relevant to the authenticated user's categories.
+     * Query: ?sort=newest|popular (default: newest)
      */
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        $posts = Post::forUserCategories($user)
+        $query = Post::forUserCategories($user)
             ->with(['user', 'categories'])
-            ->withCount(['likes', 'stars', 'reactions', 'comments'])
-            ->latest()
-            ->paginate(15);
+            ->withCount(['likes', 'stars', 'reactions', 'comments']);
+
+        $sort = $request->query('sort', 'newest');
+        if ($sort === 'popular') {
+            $query->orderByDesc('reactions_count')->orderByDesc('created_at');
+        } else {
+            $query->latest();
+        }
+
+        $posts = $query->paginate(15);
 
         return response()->json([
             'posts' => PostResource::collection($posts),
@@ -69,6 +89,7 @@ class PostController extends Controller
                 'last_page' => $posts->lastPage(),
                 'per_page' => $posts->perPage(),
                 'total' => $posts->total(),
+                'sort' => $sort,
             ],
         ]);
     }

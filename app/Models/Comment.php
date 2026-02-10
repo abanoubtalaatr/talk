@@ -13,7 +13,15 @@ class Comment extends Model
         'post_id',
         'parent_id',
         'content',
+        'reported_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'reported_at' => 'datetime',
+        ];
+    }
 
     /*
     |--------------------------------------------------------------------------

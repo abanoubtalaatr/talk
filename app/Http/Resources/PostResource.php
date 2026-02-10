@@ -13,6 +13,9 @@ class PostResource extends JsonResource
             'id' => $this->id,
             'content' => $this->content,
             'is_anonymous' => $this->is_anonymous,
+            'is_featured' => $this->when(isset($this->is_featured), fn () => $this->is_featured),
+            'is_hidden' => $this->when(isset($this->is_hidden), fn () => $this->is_hidden),
+            'reported_at' => $this->when(isset($this->reported_at), fn () => $this->reported_at?->toISOString()),
             'user' => $this->when(
                 !$this->is_anonymous,
                 fn () => new UserResource($this->whenLoaded('user')),

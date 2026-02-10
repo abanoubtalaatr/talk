@@ -20,8 +20,10 @@ class User extends Authenticatable
 
     protected $fillable = [
         'username',
+        'display_name',
         'password',
         'referral_user_id',
+        'plan_id',
         'bio',
         'image',
         'points',
@@ -31,6 +33,7 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'last_login_user_agent',
+        'banned_at',
     ];
 
     protected $hidden = [
@@ -42,6 +45,7 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'last_login_at' => 'datetime',
+            'banned_at' => 'datetime',
             'points' => 'integer',
         ];
     }
@@ -51,6 +55,11 @@ class User extends Authenticatable
     | Relationships
     |--------------------------------------------------------------------------
     */
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
 
     public function referrer(): BelongsTo
     {
@@ -97,6 +106,11 @@ class User extends Authenticatable
         return $this->hasMany(ActivityLog::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function blockedUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'blocked_users', 'user_id', 'blocked_user_id')
@@ -118,5 +132,15 @@ class User extends Authenticatable
     public function scopeWithStats($query)
     {
         return $query->withCount(['posts', 'comments', 'referrals']);
+    }
+
+    public function scopeNotBanned($query)
+    {
+        return $query->whereNull('banned_at');
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->banned_at !== null;
     }
 }

@@ -15,10 +15,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed default categories first
+        // Seed default categories and plans first
         $this->call(CategorySeeder::class);
+        $this->call(PlanSeeder::class);
 
         // Create demo users
         $this->call(DemoSeeder::class);
+
+        // Three users with same categories for broadcast/message/post testing
+        $this->call(BroadcastTestSeeder::class);
     }
 }

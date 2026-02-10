@@ -12,6 +12,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'username' => $this->username,
+            'display_name' => $this->when(isset($this->display_name), $this->display_name),
             'bio' => $this->bio,
             'image' => $this->image,
             'points' => $this->points,
